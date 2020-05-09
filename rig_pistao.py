@@ -23,7 +23,7 @@ def pistao (joint1, joint2, joint3, joint4):
     cmds.rename(joint4)
     RigJoint4 = cmds.ls(selection= True)
 
-    Controller = cmds.circle(n= "pist_controler", r=2.0)
+    Controller = cmds.circle(n= "pist_controler", r=5.0)
     ControllerNull = cmds.group(em= True, n= "pist_control_NULL")
 
     cmds.parent(Controller, ControllerNull)
