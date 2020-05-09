@@ -1,11 +1,12 @@
 import maya.cmds as cmds
 import maya.mel as mel
 
-#rigArm("arm_R_", "elbow_R_", "wrist_R_",-7, 2)   
+#rigArm("Arm_R_", "Elbow_R_", "Wrist_R_",-15)
+#rigArm("Arm_L_", "Elbow_L_", "Wrist_L_",-15)  
 
 
 def rigArm(joint1, joint2, joint3,moveZ):
-    RenameChars = '_' + joint1[4]
+    RenameChars = '_' + joint1[4] + joint1[0] + joint1[1] + joint1[2]
 
     selection = cmds.ls(selection = True)
 
@@ -23,8 +24,8 @@ def rigArm(joint1, joint2, joint3,moveZ):
     RIGJoint3 = cmds.ls(selection = True)
 
     #Criar Controles
-    ArmController = cmds.circle(n = joint1 + "_Controller")
-    WristController = cmds.circle(n = joint3 + "_Controller")
+    ArmController = cmds.circle(n = joint1 + "_Controller", r=7.0)
+    WristController = cmds.circle(n = joint3 + "_Controller", r=7.0)
 
     #Criar Nulos
     ArmControllerNull = cmds.group(em= True, n= joint1 + "Pos_Null" )
@@ -36,10 +37,13 @@ def rigArm(joint1, joint2, joint3,moveZ):
 
     #Posionar os nulos no lugar certo   
     cmds.delete(cmds.parentConstraint(RIGJoint1, ArmControllerNull))
-    cmds.delete(cmds.parentConstraint(RIGJoint2, WristControllerNull))
+    cmds.delete(cmds.parentConstraint(RIGJoint3, WristControllerNull))
 
-    #Girar o controle do pulso/wrist
-    cmds.rotate("90deg", 0, 0, joint3 + "Pos_Null")
+    #Deixar os controles do seu jeito (rotacao, scale, posicao....)
+    cmds.rotate("90deg", 0, 0, joint3 + "Pos_Null") #pulso
+    
+    cmds.rotate(0, "90deg", 0, joint1 + "Pos_Null") #ombro
+    
 
     #Colocar o constraint no joint
     cmds.parentConstraint(ArmController, RIGJoint1)
@@ -47,7 +51,7 @@ def rigArm(joint1, joint2, joint3,moveZ):
 
     #Criar uma Hieraquia entre os controles
     cmds.parent(WristControllerNull, ArmControllerNull)
-
+    
     #Freeze Transformations
     cmds.makeIdentity(apply=True, rotate=True, translate=True, scale=True)
 
@@ -58,23 +62,35 @@ def rigArm(joint1, joint2, joint3,moveZ):
     cmds.parent("ik_RPS" + RenameChars, WristController)  #Parentear o IK_RPS no WristControl (do pé ou mão)
 
     # Criar o controle e o nulo do poleVector(joelho/cotovelo)
-    PoleController = cmds.nurbsSquare(n = "pole_Controller" + RenameChars)
+    PoleController = cmds.nurbsPlane(n = "pole_Controller" + RenameChars)
     PoleControllerNull = cmds.group(empty = True, n = "pole_Null" + RenameChars) 
 
     #Criar uma Hieraquia entre os controles do poleVector
     cmds.parent(PoleController, PoleControllerNull)
 
-    #Girar o pole controller para ficar reto
+    #Deixar o pole controller no meu estilo 
     cmds.rotate("90deg",0, 0, "pole_Null" + RenameChars)
+    cmds.scale(5, 5, 5, "pole_Null" + RenameChars)
 
     #Reposicionar o nulo do Pole Vector no lugar certo 
     cmds.delete(cmds.parentConstraint(RIGJoint2, PoleControllerNull))
 
     #Mover o Pole Controller um pouco para trás
-    #cmds.move("pole_Controller" + RenameChars + ".translateX","pole_Controller" + RenameChars + ".translateY",moveZ, 'poleVector_Control' + RenameChars)
+    cmds.move(moveZ,"pole_Null" + RenameChars, z= True)
 
     #Adicionar o pole vector constraint no Ik Rps
     cmds.poleVectorConstraint(PoleController, "ik_RPS" + RenameChars)
 
     #Freeze Transformations
     cmds.makeIdentity(apply=True, rotate=True, translate=True, scale=True)
+
+
+
+def rodar(degX,degY,degZ):
+    #rodar("90deg", "-45deg", "-80deg")
+    selection = cmds.ls(selection = True)
+
+    cmds.rotate(degX,degY,degZ, selection)
+     #Freeze Transformations
+    cmds.makeIdentity(apply=True, rotate=True)
+
