@@ -40,5 +40,3 @@ def pistao (joint1, joint2, joint3, joint4):
     cmds.select(Controller)
     cmds.addAttr(sn= "upDown", ln= "Move_Up_Down", at= "float", min= 18, max= 40, r = True, w = True, h = False, k = True)
     cmds.connectAttr("pist_controler.Move_Up_Down", joint3 + ".translateX")
-
-    cmds.createNode
